@@ -1,0 +1,30 @@
+{
+  "sessionId": "{target-repo}-issue-{github-number}",
+  "targetRepo": "{target-repo}",
+  "githubIssueNumber": 0,
+  "githubIssueUrl": "https://github.com/owner/repo/issues/0",
+  "prUrl": null,
+  "status": "IN_PROGRESS",
+  "reviewStatus": "WAITING_FOR_PLAN_REVIEW",
+  "currentStage": "PLANNING",
+  "nextAction": "WAITING_FOR_CHATGPT_REVIEW",
+  "createdAt": "2026-08-12T00:00:00Z",
+  "updatedAt": "2026-08-12T00:00:00Z",
+  "assignedWorker": "Gemini",
+  "decisionLog": [
+    {
+      "ts": "2026-08-12T00:00:00Z",
+      "decision": "Session created and initial GOAL/PLAN drafted."
+    }
+  ],
+  "referencedFiles": [],
+  "modifiedFiles": [],
+  "reviewHistory": [
+    {
+      "stage": "PLAN_REVIEW",
+      "reviewer": "ChatGPT",
+      "status": "PENDING",
+      "comment": ""
+    }
+  ]
+}
