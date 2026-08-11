@@ -36,16 +36,50 @@
 
 ---
 
-## 3. Session 수명주기 단계 (Lifecycle Stages)
+## 3. GitHub Push 의무 & 리뷰 요청 마커 (MANDATORY)
+
+> **CRITICAL**: 리뷰어를 포함한 사용자는 GitHub상에 올라온 상태만 볼 수 있습니다. 
+> 로컬 `~/srv/agi-with-gpt`에만 세션 문서가 존재하면 리뷰할 수 없습니다.
+
+### 1) Git Push 필수 규정:
+Worker Agent가 리뷰를 요청할 때는 **반드시** 세션 디렉토리(`agents/sessions/active/<session-id>/`) 및 작업 브랜치를 GitHub remote에 `git push`한 후 코멘트를 등록해야 합니다.
+
+### 2) 표준 리뷰 마커 (Standard Review Markers):
+- **Plan / 중간 구현 리뷰 요청 시**: `[READY_FOR_REVIEW]`
+- **최종 PR 리뷰 요청 시**: `[READY_FOR_PR_REVIEW]`
+
+### 3) Issue 코멘트 양식:
+```text
+[READY_FOR_REVIEW]
+
+Session:
+agents/sessions/active/<session-id>/
+
+Branch:
+agent/<session-id>
+
+Review cycle:
+1
+```
+
+---
+
+## 4. Session 수명주기 단계 (Lifecycle Stages)
 
 1. **Issue 수신 & Session 생성**:
    - Target Repo 및 GitHub Issue 번호를 파악하여 Session ID 결정.
    - `agents/templates/`의 양식을 `agents/sessions/active/<session-id>/`로 복사.
    - `GOAL.md`, `PLAN.md`, `state.json` 작성 및 `state.json` 상태를 `IN_PROGRESS`로 설정.
-2. **Review Loop**:
-   - ChatGPT Review 결과(`APPROVED_FOR_NEXT_STAGE` / `CHANGES_REQUESTED`)에 따라 세션 문서 및 코드 업데이트.
-3. **Execution & Verification**:
+2. **Review 요청 & Git Push**:
+   - 세션 파일 커밋 후 GitHub `git push`.
+   - Issue 코멘트에 `[READY_FOR_REVIEW]` 마커 및 Session 경로, Review cycle 표기.
+3. **Review Loop**:
+   - ChatGPT Review 결과(`APPROVED_FOR_NEXT_STAGE` / `CHANGES_REQUESTED`) 확인.
+   - 이미 처리된 `Review cycle`은 재처리하지 않으며, `CHANGES_REQUESTED` 시 `Review cycle`을 1 증가시키고 세션/코드 수정 후 다시 Push 및 `[READY_FOR_REVIEW]` 코멘트 전송.
+4. **Execution & Verification**:
    - Target Repo에서 코드 변경 및 테스트/빌드 검증 수행. `state.json` 내 `decisionLog`, `modifiedFiles` 업데이트.
-4. **Completion & Archive**:
-   - PR 승인 및 작업 완료 확인 후 `state.json`의 `status`를 `DONE`으로 변경.
-   - 세션 디렉토리를 `agents/sessions/completed/<session-id>/`로 이동.
+5. **PR 생성 & PR Review**:
+   - PR 생성 후 `[READY_FOR_PR_REVIEW]` 마커와 함께 PR 제출.
+6. **Completion & Archive**:
+   - PR 승인(`APPROVE` & Merge) 확인 후 `state.json`의 `status`를 `DONE`으로 변경.
+   - 세션 디렉토리를 `agents/sessions/completed/<session-id>/`로 이동 후 Git Push.

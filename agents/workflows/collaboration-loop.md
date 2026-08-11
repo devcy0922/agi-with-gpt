@@ -26,7 +26,8 @@ agents/sessions/active/<session-id>/
     │
     ▼
 GitHub Issue Comment
-"Plan 준비 완료 / Session 경로"
+"[READY_FOR_REVIEW] / Session 경로 / Branch / Review cycle"
+(Git Push 필수 완료 후 등록)
     │
     ▼
 ChatGPT Review
@@ -37,6 +38,7 @@ ChatGPT Review
              │                   │
              ▼                   │
         Worker 수정              │
+        & Git Push               │
              │                   │
              └───────────────────┘
                                  │
@@ -47,10 +49,8 @@ ChatGPT Review
                       Test / Build / Verify
                                  │
                                  ▼
-                          ChatGPT Review
-                                 │
-                                 ▼
                               PR 생성
+                      [READY_FOR_PR_REVIEW]
                                  │
                                  ▼
                           ChatGPT PR Review
