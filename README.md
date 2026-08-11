@@ -102,7 +102,7 @@ Target Repository와 GitHub Issue 번호를 조합하여 고유한 이름을 생
 
 ## 5. 보안 및 커밋 규정 (Strict Security Policy)
 
-본 레포지거리는 GitHub `devcy0922` 계정의 **Public Repository**로 운용됩니다. 아래 보안 규정을 엄수해야 합니다.
+본 레포지거리는 GitHub `yooncy` 계정의 **Public Repository**로 운용됩니다. 아래 보안 규정을 엄수해야 합니다.
 
 1. **`.env` 파일 커밋 절대 금지**: 모든 시크릿, 환경 변수 파일은 `.gitignore`에 의해 차단되며 git에 커밋되지 않습니다.
 2. **사설 IP (`192.168.x.x`) 노출 절대 금지**: 내부 사설 IP, 서브넷 정보, 비밀 토폴로지는 문서나 소스코드로 공개 금지됩니다.
