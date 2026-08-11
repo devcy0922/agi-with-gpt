@@ -2,10 +2,11 @@
   "sessionId": "{target-repo}-issue-{github-number}",
   "targetRepo": "{target-repo}",
   "githubIssueNumber": 0,
-  "githubIssueUrl": "https://github.com/owner/repo/issues/0",
+  "githubIssueUrl": "https://github.com/devcy0922/{target-repo}/issues/0",
   "prUrl": null,
   "status": "IN_PROGRESS",
   "reviewStatus": "WAITING_FOR_PLAN_REVIEW",
+  "reviewCycle": 1,
   "currentStage": "PLANNING",
   "nextAction": "WAITING_FOR_CHATGPT_REVIEW",
   "createdAt": "2026-08-12T00:00:00Z",
@@ -14,13 +15,14 @@
   "decisionLog": [
     {
       "ts": "2026-08-12T00:00:00Z",
-      "decision": "Session created and initial GOAL/PLAN drafted."
+      "decision": "Session created, files pushed to git, and [READY_FOR_REVIEW] comment posted."
     }
   ],
   "referencedFiles": [],
   "modifiedFiles": [],
   "reviewHistory": [
     {
+      "cycle": 1,
       "stage": "PLAN_REVIEW",
       "reviewer": "ChatGPT",
       "status": "PENDING",

@@ -37,16 +37,16 @@ sequenceDiagram
     ChatGPT->>GH: 1. GitHub Issue 생성 (기획 및 요구사항)
     Worker->>GH: 2. Issue 분석 & Target Repo 조사
     Worker->>Session: 3. Session 생성 (GOAL.md, PLAN.md, state.json)
-    Worker->>GH: 4. Issue Comment 작성 ("Plan 준비 완료 / Session 경로")
-    ChatGPT->>GH: 5. Plan Review (APPROVED 또는 CHANGES_REQUESTED)
+    Worker->>GH: 4. Git Push & Issue Comment 작성 ([READY_FOR_REVIEW])
+    ChatGPT->>GH: 5. Plan Review (APPROVED_FOR_NEXT_STAGE 또는 CHANGES_REQUESTED)
     alt CHANGES_REQUESTED
-        Worker->>Session: GOAL/PLAN 수정
-        Worker->>GH: Re-comment 리뷰 요청
+        Worker->>Session: GOAL/PLAN 수정 & Review cycle 증가
+        Worker->>GH: Git Push & Re-comment ([READY_FOR_REVIEW])
     end
     Worker->>Worker: 6. Implementation & Local Build / Verification
-    Worker->>GH: 7. PR 생성 (검증 증거 로그 포함)
-    ChatGPT->>GH: 8. PR Review & Approval (Approve & Merge)
-    Worker->>Session: 9. Session status DONE 변경 & completed 아카이브 이동
+    Worker->>GH: 7. PR 생성 ([READY_FOR_PR_REVIEW])
+    ChatGPT->>GH: 8. PR Review & Approval (APPROVE & Merge)
+    Worker->>Session: 9. Session status DONE 변경 & completed 아카이브 이동 (Git Push)
 ```
 
 ---
