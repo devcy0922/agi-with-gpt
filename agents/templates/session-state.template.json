@@ -2,7 +2,7 @@
   "sessionId": "{target-repo}-issue-{github-number}",
   "targetRepo": "{target-repo}",
   "githubIssueNumber": 0,
-  "githubIssueUrl": "https://github.com/devcy0922/{target-repo}/issues/0",
+  "githubIssueUrl": "https://github.com/yooncy/{target-repo}/issues/0",
   "prUrl": null,
   "status": "IN_PROGRESS",
   "reviewStatus": "WAITING_FOR_PLAN_REVIEW",

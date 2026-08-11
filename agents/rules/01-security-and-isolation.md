@@ -1,6 +1,6 @@
 # 01-security-and-isolation.md — 보안 및 정보 격리 규정
 
-> **CRITICAL / MANDATORY**: 본 레포지토리는 GitHub `devcy0922` 계정의 **Public Repository**로 공개됩니다.
+> **CRITICAL / MANDATORY**: 본 레포지토리는 GitHub `yooncy` 계정의 **Public Repository**로 공개됩니다.
 > 보안 위반 요소는 어떠한 경우에도 커밋되거나 유출되어서는 안 됩니다.
 
 ---
