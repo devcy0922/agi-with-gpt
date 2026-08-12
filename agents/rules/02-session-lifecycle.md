@@ -1,23 +1,28 @@
-# 02-session-lifecycle.md — Session 실행 상태 관리 규정
+# 02-session-lifecycle.md — Session 수명주기 및 실행 상태 관리 규정
 
-> **MANDATORY**: 모든 작업의 실행 상태(Execution State)는 Session 디렉토리를 SSOT로 사용합니다.
-> 별도의 `.ai/state` 디렉토리를 생성하지 않으며, Session이 유일한 실시간 영속화 위치입니다.
+> **MANDATORY**: 모든 작업의 실행 상태(Execution State)는 Session 디렉토리를 SSOT로 관리합니다.
 
 ---
 
-## 1. Session ID 명명 규칙
+## 1. Session ID 명명 규칙 & Session 재사용 (Continuation)
 
-여러 Target Repository의 이슈를 동시 처리하므로 단순 숫자/단어 대신 다음 형식을 엄격히 적용합니다.
-
-### 형식:
+### 1) ID 명명 규칙:
 ```text
-<target-repo>-issue-<github-number>
+<target-repo>-issue-<github-number> (또는 <target-repo>-session-<timestamp/task-name>)
 ```
-
-### 예시:
-- `promptia-issue-31`
-- `document-validator-issue-7`
+예시:
 - `govail-issue-52`
+- `agi-with-gpt-issue-1`
+- `govail-session-router-test`
+
+### 2) Session Continuation 규칙:
+모든 Prompt마다 무조건 새로운 Session을 만들지 않습니다.
+기존 Active Session과:
+1. **Target Repository 동일**
+2. **Goal 동일**
+3. **기존 작업의 직접적인 연속**
+
+인 경우 기존 Active Session을 재사용하여 상태를 이어갑니다. 새로운 독립 목표인 경우에만 새 Session을 생성합니다.
 
 ---
 
@@ -30,56 +35,70 @@
 `agents/sessions/completed/<session-id>/`
 
 ### 필수 3대 파일 구성:
-1. `GOAL.md` — 작업 목적, Done 조건, Hard Constraints (양식: `agents/templates/GOAL.template.md`)
-2. `PLAN.md` — 단계별 실행 절차, 빌드/검증 명령, 위험 요소 (양식: `agents/templates/PLAN.template.md`)
-3. `state.json` — 실시간 machine-readable 상태, 타임라인, 수정 파일 목록 (양식: `agents/templates/session-state.template.json`)
+1. `GOAL.md` — Target Repo, Root, 최종 목적, Done 조건 (양식: `agents/templates/GOAL.template.md`)
+2. `PLAN.md` — 실행 계획, Second Inspection 검증, 테스트/배포/Smoke Test 전략 (양식: `agents/templates/PLAN.template.md`)
+3. `state.json` — 실시간 machine-readable 상태 (양식: `agents/templates/session-state.template.json`)
 
 ---
 
-## 3. GitHub Push 의무 & 리뷰 요청 마커 (MANDATORY)
+## 3. POC 단순화 State Machine (Approval-Free Execution)
 
-> **CRITICAL**: 리뷰어를 포함한 사용자는 GitHub상에 올라온 상태만 볼 수 있습니다. 
-> 로컬 `~/srv/agi-with-gpt`에만 세션 문서가 존재하면 리뷰할 수 없습니다.
+POC 단계에서는 매 단계 ChatGPT 승인 대기(`WAITING_FOR_CHATGPT_REVIEW`, `WAITING_FOR_PLAN_REVIEW`)를 제거하고 **PLAN 작성 및 Second Inspection 완료 후 즉시 자율 구현**합니다.
 
-### 1) Git Push 필수 규정:
-Worker Agent가 리뷰를 요청할 때는 **반드시** 세션 디렉토리(`agents/sessions/active/<session-id>/`) 및 작업 브랜치를 GitHub remote에 `git push`한 후 코멘트를 등록해야 합니다.
-
-### 2) 표준 리뷰 마커 (Standard Review Markers):
-- **Plan / 중간 구현 리뷰 요청 시**: `[READY_FOR_REVIEW]`
-- **최종 PR 리뷰 요청 시**: `[READY_FOR_PR_REVIEW]`
-
-### 3) Issue 코멘트 양식:
 ```text
-[READY_FOR_REVIEW]
-
-Session:
-agents/sessions/active/<session-id>/
-
-Branch:
-agent/<session-id>
-
-Review cycle:
-1
+CREATED
+   ↓
+REPOSITORY_ANALYSIS
+   ↓
+PLANNING
+   ↓
+PLAN_VALIDATION (Second Inspection)
+   ↓
+IMPLEMENTING
+   ↓
+TESTING
+   ↓
+DEPLOYING
+   ↓
+POST_DEPLOY_VALIDATION
+   ↓
+DOCUMENTING
+   ↓
+COMPLETED
+   ↓
+ARCHIVED
 ```
 
+### 예외/중단 상태:
+- `BLOCKED`: 일반적 해결 불가 blocker 발생 시 원인 기록 후 대기
+- `FAILED`: 반복적 테스트/배포 실패 시
+- `BLOCKED_REQUIRES_USER_DECISION`:
+  다음 조건에 해당하는 경우 실행을 중지하고 사용자 결정을 대기합니다.
+  - Repository Root 바깥 파일 수정 필요 시
+  - 타 Repository 변경 필요 시
+  - Shared Infrastructure 변경 필요 시
+  - Credential / Secret 필요 시
+  - 파괴적인 DB Migration 필요 시
+  - Production Data 손실 가능성 시
+
 ---
 
-## 4. Session 수명주기 단계 (Lifecycle Stages)
+## 4. Session Archive 절차
 
-1. **Issue 수신 & Session 생성**:
-   - Target Repo 및 GitHub Issue 번호를 파악하여 Session ID 결정.
-   - `agents/templates/`의 양식을 `agents/sessions/active/<session-id>/`로 복사.
-   - `GOAL.md`, `PLAN.md`, `state.json` 작성 및 `state.json` 상태를 `IN_PROGRESS`로 설정.
-2. **Review 요청 & Git Push**:
-   - 세션 파일 커밋 후 GitHub `git push`.
-   - Issue 코멘트에 `[READY_FOR_REVIEW]` 마커 및 Session 경로, Review cycle 표기.
-3. **Review Loop**:
-   - ChatGPT Review 결과(`APPROVED_FOR_NEXT_STAGE` / `CHANGES_REQUESTED`) 확인.
-   - 이미 처리된 `Review cycle`은 재처리하지 않으며, `CHANGES_REQUESTED` 시 `Review cycle`을 1 증가시키고 세션/코드 수정 후 다시 Push 및 `[READY_FOR_REVIEW]` 코멘트 전송.
-4. **Execution & Verification**:
-   - Target Repo에서 코드 변경 및 테스트/빌드 검증 수행. `state.json` 내 `decisionLog`, `modifiedFiles` 업데이트.
-5. **PR 생성 & PR Review**:
-   - PR 생성 후 `[READY_FOR_PR_REVIEW]` 마커와 함께 PR 제출.
-6. **Completion & Archive**:
-   - PR 승인(`APPROVE` & Merge) 확인 후 `state.json`의 `status`를 `DONE`으로 변경.
-   - 세션 디렉토리를 `agents/sessions/completed/<session-id>/`로 이동 후 Git Push.
+작업이 완료되면:
+
+1. `state.json`의 `status`를 `"COMPLETED"`, `currentStage`를 `"COMPLETED"`로 변경합니다.
+2. 세션 문서에 최소 다음 기록이 보존되어 있는지 최종 검증합니다:
+   - `GOAL`
+   - `FINAL PLAN`
+   - 실제 변경 내용 및 파일 목록
+   - 테스트 결과 & 빌드 결과
+   - 배포 결과 & Smoke Test 결과
+   - Commit SHA 및 timestamp
+   - 남은 문제 / 기술부채
+3. 세션 디렉토리를 `active`에서 `completed`로 이동합니다:
+   ```bash
+   mv agents/sessions/active/<session-id> agents/sessions/completed/
+   ```
+4. git commit을 남겨 아카이브 세션을 보존합니다.
+

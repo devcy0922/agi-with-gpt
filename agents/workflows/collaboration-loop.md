@@ -1,85 +1,66 @@
-# collaboration-loop.md — ChatGPT & Coding Agent 협업 워크플로우
+# collaboration-loop.md — 대화 기반 Autonomous Coding Loop 워크플로우
 
-본 워크플로우는 ChatGPT, Gemini(Primary Worker), Local LLM(Secondary Worker) 간의 깃허브 및 세션 기반 순환 개발 프로세스입니다.
+본 워크플로우는 ChatGPT, User(Human Gate), Coding Agent(Gemini Primary Worker / Secondary Worker) 간의 프롬프트 복붙 기반 자율 순환 개발 프로세스입니다.
 
 ---
 
-## 1. 전체 Collaboration Loop 다이어그램
+## 1. 전체 Autonomous Coding Loop 다이어그램
 
 ```text
 ChatGPT
     │
-    │ 1. 다음 작업 판단 & 기획
+    │ 1. 결과 검토 & 다음 Prompt 생성
     ▼
-GitHub Issue 생성
+User (Human Gate)
+    │
+    │ 2. Prompt 복사 후 Coding Agent에 입력
+    ▼
+Coding Agent
+    │
+    ├─ 3. Target Repository 확인 및 Root / Boundary 검증
+    ├─ 4. Repository 분석 (PROJECT, STATE, ROADMAP, DEPLOYMENT, Current Code)
+    ├─ 5. Active Session 생성 또는 기존 Session 재개
+    ├─ 6. PLAN 작성
+    ├─ 7. 코드 재검토 (Second Inspection) & PLAN Final 확정
+    ├─ 8. 승인 없이 자율 구현 (Implementation)
+    ├─ 9. 자동 빌드 & 단위/통합 테스트 (Test & Build)
+    ├─ 10. 실배포 (Deployment)
+    ├─ 11. 배포 후 검증 (Post-Deploy Smoke Test)
+    ├─ 12. 레포지토리 문서 업데이트 (STATE.md / ROADMAP.md 갱신)
+    ├─ 13. 세션 아카이브 (completed 이동)
+    ├─ 14. 현재 상태 요약 (Current Status)
+    └─ 15. 다음 Action 정확히 3개 추천 (Recommended Next Actions)
     │
     ▼
-Gemini / Local LLM (Worker)
+User (Human Gate)
     │
-    ├─ 2. Issue 분석 & Target Repo 조사
-    │
+    │ 16. 결과 직접 검증 및 ChatGPT에 결과 전달
     ▼
-agents/sessions/active/<session-id>/
-    ├─ GOAL.md
-    ├─ PLAN.md
-    └─ state.json
+ChatGPT
     │
-    ▼
-GitHub Issue Comment
-"[READY_FOR_REVIEW] / Session 경로 / Branch / Review cycle"
-(Git Push 필수 완료 후 등록)
-    │
-    ▼
-ChatGPT Review
-    │
-    ├─ APPROVED_FOR_NEXT_STAGE ───┐
-    │                            │
-    └─ CHANGES_REQUESTED         │
-             │                   │
-             ▼                   │
-        Worker 수정              │
-        & Git Push               │
-             │                   │
-             └───────────────────┘
-                                 │
-                                 ▼
-                           Implementation
-                                 │
-                                 ▼
-                      Test / Build / Verify
-                                 │
-                                 ▼
-                              PR 생성
-                      [READY_FOR_PR_REVIEW]
-                                 │
-                                 ▼
-                          ChatGPT PR Review
-                           ├─ APPROVE
-                           └─ REQUEST_CHANGES
-                                 │
-                                 ▼
-                             Worker 수정
-                                 │
-                                 └───── 반복 (승인 시 Complete)
+    └─ (다음 작업 Prompt 작성 후 반복)
 ```
 
 ---
 
-## 2. 역할별 핵심 행동 지칙 (Role Responsibilities)
+## 2. 역할별 핵심 행동 지침 (Role Responsibilities)
 
-### 1) ChatGPT (Planner & Reviewer)
-- **기획 & 이슈 작성**: Target Repository의 필요한 작업 및 버그를 정의하여 GitHub Issue 생성.
-- **PLAN / GOAL Review**: Worker가 생성한 세션 문서(`GOAL.md`, `PLAN.md`)를 검토하고 `APPROVED_FOR_NEXT_STAGE` 또는 `CHANGES_REQUESTED` 의견 전달.
-- **PR Review & Approval**: Worker가 작성한 PR 및 검증 로그 확인 후 최종 승인(Approve & Merge) 수행.
+### 1) ChatGPT (Planner, Reviewer, Next Action Selector)
+- **결과 검토**: User가 전달한 실행 결과, Current Status, 배포/테스트 로그 검토.
+- **다음 작업 판단**: 로드맵 및 현 상태 기반으로 추진할 최적의 다음 작업 결정.
+- **실행 Prompt 작성**: `target_repository`, `repository_root`, 구체적 `Goal`이 포함된 Prompt 생성.
 
-### 2) Gemini (Primary Coding Worker)
-- **이슈 분석 및 조사**: Target Repo를 조사하고, `agents/sessions/active/<session-id>/` 하위에 세션 파일 생성.
-- **이슈 코멘트 남기기**: 세션 경로 및 계획 요약 작성 후 리뷰 요청.
-- **구현 & 검증**: Plan 승인 완료 시 실제 코드 작성, 빌드 및 테스트 검증 수행.
-- **PR 생성**: 변경 사항과 실검증 결과 로그를 포함하여 PR 작성.
+### 2) Coding Agent (Primary Worker — Gemini)
+- **Repository Isolation 준수**: Target Repo 외 타 Repo, Repo Root 밖 파일, Shared Infra 절대 수정 금지.
+- **Plan & Second Inspection**: Plan 작성 후 실제 소스코드를 재검토하여 PLAN Final 확정.
+- **자율 실행 (Approval-Free)**: 중간 승인 대기 없이 구현 → 빌드 → 테스트 → 배포 → Smoke Test 자율 완료.
+- **문서 갱신 & 아카이브**: `STATE.md`, `ROADMAP.md` 갱신 및 완료 세션을 `completed`로 이관.
+- **결과 요약 및 추천**: `Current Status` 요약 및 `Recommended Next Actions` 3개 추천.
 
-### 3) Local LLM (Secondary Coding Worker)
-- 반복적 코드 작업, 리팩토링 보조, 테스트 코드 작성, 정적 분석 지원.
+### 3) User (Human Gate)
+- 작업 실행 중간 승인 요청 없이 **한 작업 사이클이 끝난 시점**에만 개입.
+- 결과를 직접 확인하고, 해당 요약과 로그를 ChatGPT에 전달하여 다음 Prompt 수신.
+- 사용자 명시적 승인시에만 Git Tag 생성 허용.
 
 ---
 

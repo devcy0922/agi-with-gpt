@@ -1,32 +1,27 @@
 {
-  "sessionId": "{target-repo}-issue-{github-number}",
+  "sessionId": "{target-repo}-session-{timestamp}",
   "targetRepo": "{target-repo}",
-  "githubIssueNumber": 0,
-  "githubIssueUrl": "https://github.com/yooncy/{target-repo}/issues/0",
-  "prUrl": null,
+  "repositoryRoot": "{repository-root}",
   "status": "IN_PROGRESS",
-  "reviewStatus": "WAITING_FOR_PLAN_REVIEW",
-  "reviewCycle": 1,
   "currentStage": "PLANNING",
-  "nextAction": "WAITING_FOR_CHATGPT_REVIEW",
+  "secondInspectionPassed": false,
   "createdAt": "2026-08-12T00:00:00Z",
   "updatedAt": "2026-08-12T00:00:00Z",
   "assignedWorker": "Gemini",
   "decisionLog": [
     {
       "ts": "2026-08-12T00:00:00Z",
-      "decision": "Session created, files pushed to git, and [READY_FOR_REVIEW] comment posted."
+      "stage": "CREATED",
+      "decision": "Session initialized and Target Repository verified."
     }
   ],
   "referencedFiles": [],
   "modifiedFiles": [],
-  "reviewHistory": [
-    {
-      "cycle": 1,
-      "stage": "PLAN_REVIEW",
-      "reviewer": "ChatGPT",
-      "status": "PENDING",
-      "comment": ""
-    }
-  ]
+  "verificationLog": {
+    "buildSuccess": false,
+    "testSuccess": false,
+    "deploySuccess": false,
+    "smokeTestSuccess": false
+  }
 }
+

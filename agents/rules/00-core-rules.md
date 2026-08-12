@@ -11,26 +11,36 @@
 
 ---
 
-## 2. 노드 역할 및 실행 환경
+## 2. Prompt 해석 우선순위 (Prompt Interpretation Order)
+
+Coding Agent가 프롬프트를 받았을 때는 다음 순서대로 명확히 판단하고 충돌을 해결합니다.
+
+1. **Explicit Target Repository**: 명시된 Target Repository 및 Root 경로
+2. **Explicit User Goal**: 프롬프트의 명시적 목표
+3. **Repository Boundary**: 레포지토리 수정 경계 제약
+4. **Repository SSOT**: 레포지토리 내 4대 문서 (`PROJECT.md`, `STATE.md`, `ROADMAP.md`, `DEPLOYMENT.md`)
+5. **Current Code**: 실제 코드베이스 현황 (문서와 코드 충돌 시 코드 우선 확인 후 문서 update)
+6. **Repository Roadmap**: 장기 계획
+7. **Agent Inference**: 에이전트 자율 추론
+
+---
+
+## 3. 오케스트레이션 및 설계 철학 (Simplify & Extend)
+
+- **No Over-Engineering**: Temporal, Message Queue, Kafka, 복잡한 Multi-Agent Orchestrator, 자동 Issue Polling/Scheduler, Vector DB 등을 추가하지 않습니다.
+- **기존 구조 우선 (Extend > Rewrite)**:
+  - `Extend > Rewrite`
+  - `Simplify > Add abstraction`
+  - `SSOT > Duplicate documentation`
+  - `Deterministic workflow > Agent magic`
+- Markdown, JSON, Git, Coding Agent, ChatGPT, User의 단순하고 명확한 조합으로 루프를 완성합니다.
+
+---
+
+## 4. 노드 역할 및 실행 환경
 
 - **실행 환경**: `macmini` (Apple Silicon M4 서버).
 - **vLLM 구동 금지**: `macmini` 환경에서는 고부하 vLLM 구동 등을 진행하지 않습니다.
 - **Metal GPU 추론 / 호스트 네이티브**: 로컬 AI 추론(mlx-lm) 및 빌드는 호스트 네이티브로 실행합니다.
 - **인프라 서비스**: DB, Redis 등 필요 시 Docker 컨테이너로 유연하게 구동합니다.
 
----
-
-## 3. 검증 게이트 (Build-Deploy-Verify Gate)
-
-작업 완료 선언 및 PR 생성 전에는 반드시 다음 단계를 검증해야 합니다.
-
-1. **실제 빌드/체크**: Target Repository에 맞는 빌드 또는 린트 명령 수행 (`npm run build`, `cargo check`, `pytest` 등).
-2. **실제 검증**: 수정된 로직이 요구사항에 부합하는지 런타임 테스트 또는 단위 테스트 실행.
-3. **증거 첨부**: 검증 결과 로그 및 상태를 세션 및 PR 설명에 명시.
-
----
-
-## 4. 오케스트레이션 설계 철학
-
-- **No Over-Orchestration**: 불필요한 daemon, webhook, polling 오케스트레이션 코드를 새로 만들지 않습니다.
-- 기존 GitHub Issue, PR, Markdown 문서, 깃 명령, LLM 도구를 조합한 **협업 루프(Collaboration Loop)**를 최우선 적용합니다.
