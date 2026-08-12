@@ -39,6 +39,13 @@
 - 다른 프로젝트 소유의 container, volume, network, database, service를 삭제하거나 재시작해서는 안 됩니다.
 - 오직 Target Repository가 소유한 전용 리소스만 조작해야 합니다.
 
+### 4) Protected Infrastructure Repositories (Target Deny-List)
+- **GoVail** (`govail`) 등 자율 코딩 시스템 자체가 의존하는 **LLM Infrastructure / API Provider**는 Target Repository 후보에서 명시적으로 제외되며, 어떠한 경우에도 수정 대상이 될 수 없습니다. (Bootstrap Dependency Protection)
+  - 🚫 `GoVail` 소스코드 수정, `git commit`, `git push`, branch 변경 금지
+  - 🚫 `GoVail` 컨테이너 재빌드, DB 변경, 환경 설정 변경, 서비스 중지/재시작 금지
+  - 💡 `GoVail`은 오직 API 호출, Health Check, LLM 추론, 읽기 전용 상태 확인 목적으로만 사용 가능합니다.
+  - 💡 `GoVail` 내부 문제가 발견되더라도 Target 레포지토리 작업 세션에서는 수정하지 않으며, `EXTERNAL_DEPENDENCY_ISSUE: GOVAIL`로 기록하고 Target 레포지토리 측에서 대응합니다.
+
 ---
 
 ## 3. 보안 검증 수칙 (Pre-commit Audit)

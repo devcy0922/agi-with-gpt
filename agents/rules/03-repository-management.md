@@ -9,14 +9,17 @@
 작업 Prompt 수신 시 Target Repository 정보를 확인하고 작업 개시 전 검증합니다.
 
 ```yaml
-target_repository: devcy0922/agi-with-gpt # 또는 GoVail/govail 등
-repository_root: /Users/yooncy/srv/agi-with-gpt # 또는 /Users/yooncy/srv/govail 등
+target_repository: promptia-create-novel # 실제 Autonomous Coding Target
+repository_root: /Users/yooncy/srv/promptia-create-novel
+protected_repositories:
+  - govail # LLM Infrastructure (수정 금지 Deny-List)
 ```
 
 ### 검증 체크리스트:
 1. `repository_root` 경로 존재 여부 및 Git repository 유효성 확인 (`git status`, `git branch`, `git log -n 5`)
 2. `repository_root` 바깥 디렉터리로 이탈하지 않는지 확인 (Filesystem Boundary Enforcer)
-3. Target Repository 내부 **`<target-repository>/.agents/`** 유효성 확인 및 4대 문서 읽기
+3. Target Repository가 `protected_repositories` Deny-List에 포함되어 있지 않은지 검증 (GoVail 등 인프라 레포 수정 시도 차단)
+4. Target Repository 내부 **`<target-repository>/.agents/`** 유효성 확인 및 4대 문서 읽기
 
 ---
 
