@@ -1,13 +1,14 @@
 # Review Loop Skill
 
 ## Overview
-ChatGPT Reviewer의 피드백을 수용하고 세션 상태와 코드를 반복적으로 개선하는 스킬입니다.
+ChatGPT의 작업 프롬프트를 수신하여 자율 작업 사이클을 완료한 뒤, 결과를 요약하고 다음 Action 3개를 추천하여 사용자가 검증할 수 있도록 전달하는 대화형 루프 스킬입니다.
 
-## Review States
-- `APPROVED_FOR_NEXT_STAGE`: 다음 단계(구현 또는 PR)로 진행.
-- `CHANGES_REQUESTED`: 지적된 사항을 `GOAL.md`, `PLAN.md` 또는 코드에 반영 후 다시 리뷰 요청.
+## Workflow Rules
+1. **Approval-Free Auto Execution**:
+   - 프롬프트 수신 후 PLAN 수립 → Second Inspection → 구현 → 빌드 → 테스트 → 배포 → Smoke Test까지 중간 승인 없이 자율 완수.
+2. **Current Status & Recommended Next Actions**:
+   - 작업 완수 후 `STATE.md`, `ROADMAP.md`를 업데이트하고 세션을 `completed`로 이동.
+   - `## Current Status` 및 `## Recommended Next Actions` (정확히 3개)를 작성.
+3. **User Validation Boundary**:
+   - 다음 Action 3개 제안 출력을 마지막으로 자율 실행을 멈추고 사용자가 검증 결과를 ChatGPT에 전달하도록 전이.
 
-## Action Steps
-1. ChatGPT feedback 코멘트 전문 읽기.
-2. 지적받은 항목별 수정 내용 세션 문서 및 `state.json` decisionLog에 반영.
-3. 수정 완료 후 issue comment 또는 PR thread에 수정 완료 알림 등록.
