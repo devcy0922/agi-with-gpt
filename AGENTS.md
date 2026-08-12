@@ -30,22 +30,40 @@
 
 ---
 
-## 3. 핵심 아키텍처 및 세션 실행 상태
+## 3. 핵심 아키텍처 및 세션 실행 상태 (Control vs Target Repository Isolation)
 
-- **Repository별 문서**: `agents/repositories/<repo-name>/` (PROJECT, STATE, ROADMAP, DEPLOYMENT)
-- **세션 상태 영속화**: `agents/sessions/active/<session-id>/` 및 `agents/sessions/completed/<session-id>/`
+```text
+agi-with-gpt (Control Repository)
+  ├── agents/rules/       ← 어떻게 일할 것인가 (Read-Only during execution)
+  ├── agents/templates/   ← 문서/세션 템플릿 (Read-Only during execution)
+  ├── agents/skills/      ← 공통 재사용 스킬 (Read-Only during execution)
+  └── agents/workflows/   ← 공통 실행 순서 (Read-Only during execution)
+
+Target Repository (e.g. govail, promptia, agi-with-gpt)
+  └── .agents/            ← 가변 상태 (Mutable State & Execution History)
+      ├── PROJECT.md      ← 프로젝트 정의
+      ├── STATE.md        ← 현재 실제 구동/구현 상태
+      ├── ROADMAP.md      ← 프로젝트 로드맵
+      ├── DEPLOYMENT.md   ← 배포/토폴로지 정보
+      └── sessions/       ← 작업 세션 영속화 (active / completed)
+```
+
+- **Control definitions**: `agi-with-gpt`에서 읽기 전용(READ-ONLY)으로 참조.
+- **Mutable task state**: 반드시 Target Repository의 **`<target-repository>/.agents/`** 내부에만 기록(WRITE).
 - **세션 필수 구성**: `GOAL.md`, `PLAN.md`, `state.json`
 
 ---
 
-## 4. 5대 핵심 디렉토리 역할
+## 4. 디렉토리 구조 및 역할
 
 ```text
-agents/
+Control Repository (agi-with-gpt/agents/):
     rules       = 어떻게 행동해야 하는가 (가드레일, 보안, 격리, 자율루프 규칙)
-    repositories= 레포지토리별 장기 문서 (PROJECT, STATE, ROADMAP, DEPLOYMENT)
     skills      = 무엇을 할 수 있는가 (재사용 스킬 및 지침)
-    templates   = 무엇을 어떤 형식으로 기록하는가 (GOAL/PLAN/State/RepoDocs)
-    workflows   = 어떤 순서로 움직이는가 (대화 기반 Autonomous Loop)
-    sessions    = 지금 실제로 무엇을 하고 있는가 (active & completed)
+    templates   = 무엇을 어떤 형식으로 기록/bootstrap하는가
+    workflows   = 어떤 순서로 움직이는가 (대화 기반 Autonomous Loop, Bootstrap)
+
+Target Repository (<target-repository>/.agents/):
+    PROJECT.md, STATE.md, ROADMAP.md, DEPLOYMENT.md = Target Repo 4대 장기 문서
+    sessions/   = Target Repo에속한 실행 세션 (active & completed)
 ```

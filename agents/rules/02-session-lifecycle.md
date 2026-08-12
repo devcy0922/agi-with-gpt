@@ -28,16 +28,18 @@
 
 ## 2. Session 위치 및 파일 구조
 
+모든 세션 상태는 **Target Repository 내부**의 `.agents/sessions/` 디렉토리에만 보관됩니다. (Control Repository `agi-with-gpt`에 저장하지 않습니다.)
+
 ### 활성 상태 (Active):
-`agents/sessions/active/<session-id>/`
+`<target-repository>/.agents/sessions/active/<session-id>/`
 
 ### 완료 상태 (Completed):
-`agents/sessions/completed/<session-id>/`
+`<target-repository>/.agents/sessions/completed/<session-id>/`
 
 ### 필수 3대 파일 구성:
-1. `GOAL.md` — Target Repo, Root, 최종 목적, Done 조건 (양식: `agents/templates/GOAL.template.md`)
-2. `PLAN.md` — 실행 계획, Second Inspection 검증, 테스트/배포/Smoke Test 전략 (양식: `agents/templates/PLAN.template.md`)
-3. `state.json` — 실시간 machine-readable 상태 (양식: `agents/templates/session-state.template.json`)
+1. `GOAL.md` — Target Repo, Root, 최종 목적, Done 조건 (양식: `agi-with-gpt/agents/templates/GOAL.template.md`)
+2. `PLAN.md` — 실행 계획, Second Inspection 검증, 테스트/배포/Smoke Test 전략 (양식: `agi-with-gpt/agents/templates/PLAN.template.md`)
+3. `state.json` — 실시간 machine-readable 상태 (양식: `agi-with-gpt/agents/templates/session-state.template.json`)
 
 ---
 
@@ -75,7 +77,7 @@ ARCHIVED
 - `BLOCKED_REQUIRES_USER_DECISION`:
   다음 조건에 해당하는 경우 실행을 중지하고 사용자 결정을 대기합니다.
   - Repository Root 바깥 파일 수정 필요 시
-  - 타 Repository 변경 필요 시
+  - 타 Repository 변경 필요 시 (Control Repository `agi-with-gpt` 수정 요구 포함)
   - Shared Infrastructure 변경 필요 시
   - Credential / Secret 필요 시
   - 파괴적인 DB Migration 필요 시
@@ -96,9 +98,9 @@ ARCHIVED
    - 배포 결과 & Smoke Test 결과
    - Commit SHA 및 timestamp
    - 남은 문제 / 기술부채
-3. 세션 디렉토리를 `active`에서 `completed`로 이동합니다:
+3. Target Repository 내부에서 세션 디렉토리를 `active`에서 `completed`로 이동합니다:
    ```bash
-   mv agents/sessions/active/<session-id> agents/sessions/completed/
+   mv <target-repository>/.agents/sessions/active/<session-id> <target-repository>/.agents/sessions/completed/
    ```
-4. git commit을 남겨 아카이브 세션을 보존합니다.
+4. git commit을 남겨 Target Repository 내에 아카이브 세션을 보존합니다.
 

@@ -29,10 +29,10 @@
 
 작업이 완료되면:
 
-1. `state.json` 내 `status`를 `"COMPLETED"`, `currentStage`를 `"COMPLETED"`로 변경합니다.
+1. Target Repo 내 `state.json` 내 `status`를 `"COMPLETED"`, `currentStage`를 `"COMPLETED"`로 변경합니다.
 2. 실행 상태 디렉토리를 `active`에서 `completed`로 이동합니다:
    ```bash
-   mv agents/sessions/active/<session-id> agents/sessions/completed/
+   mv <target-repository>/.agents/sessions/active/<session-id> <target-repository>/.agents/sessions/completed/
    ```
-3. Git commit을 수행하여 아카이브 세션을 저장합니다.
+3. Git commit을 수행하여 Target Repository 내에 아카이브 세션을 저장합니다.
 
