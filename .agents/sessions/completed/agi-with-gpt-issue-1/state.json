@@ -16,32 +16,14 @@
     }
   ],
   "modifiedFiles": [
+    {
+      "path": "AGENTS.md",
       "action": "modified"
     },
     {
       "path": "agents/templates/session-state.template.json",
       "action": "modified"
-    },
-    {
-      "path": "agents/sessions/active/agi-with-gpt-issue-1/GOAL.md",
-      "action": "created"
-    },
-    {
-      "path": "agents/sessions/active/agi-with-gpt-issue-1/PLAN.md",
-      "action": "created"
-    },
-    {
-      "path": "agents/sessions/active/agi-with-gpt-issue-1/state.json",
-      "action": "created"
     }
   ],
-  "reviewHistory": [
-    {
-      "cycle": 1,
-      "stage": "PLAN_REVIEW",
-      "reviewer": "ChatGPT",
-      "status": "PENDING",
-      "comment": ""
-    }
-  ]
+  "reviewHistory": []
 }

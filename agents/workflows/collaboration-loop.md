@@ -18,23 +18,24 @@ User (Human Gate)
 Coding Agent
     │
     ├─ 3. Target Repository 확인 및 Root / Boundary 검증
-    ├─ 4. Repository 분석 (PROJECT, STATE, ROADMAP, DEPLOYMENT, Current Code)
-    ├─ 5. Active Session 생성 또는 기존 Session 재개
-    ├─ 6. PLAN 작성
-    ├─ 7. 코드 재검토 (Second Inspection) & PLAN Final 확정
-    ├─ 8. 승인 없이 자율 구현 (Implementation)
-    ├─ 9. 자동 빌드 & 단위/통합 테스트 (Test & Build)
-    ├─ 10. 실배포 (Deployment)
-    ├─ 11. 배포 후 검증 (Post-Deploy Smoke Test)
-    ├─ 12. 레포지토리 문서 업데이트 (STATE.md / ROADMAP.md 갱신)
-    ├─ 13. 세션 아카이브 (completed 이동)
-    ├─ 14. 현재 상태 요약 (Current Status)
-    └─ 15. 다음 Action 정확히 3개 추천 (Recommended Next Actions)
+    ├─ 4. Target Repo내 .agents/ 유효성 검증 (없을 시 Bootstrap 실행)
+    ├─ 5. Repository 분석 (.agents/PROJECT, STATE, ROADMAP, DEPLOYMENT, Current Code)
+    ├─ 6. Active Session 생성 또는 기존 Session 재개 (<target-repo>/.agents/sessions/)
+    ├─ 7. PLAN 작성 (Write path가 Target Repo 내부에만 존재하는지 확인)
+    ├─ 8. 코드 재검토 (Second Inspection) & PLAN Final 확정
+    ├─ 9. 승인 없이 자율 구현 (Implementation)
+    ├─ 10. 자동 빌드 & 단위/통합 테스트 (Test & Build)
+    ├─ 11. 실배포 (Deployment)
+    ├─ 12. 배포 후 검증 (Post-Deploy Smoke Test)
+    ├─ 13. Target Repo 레포지토리 문서 업데이트 (<target-repo>/.agents/STATE.md / ROADMAP.md 갱신)
+    ├─ 14. 세션 아카이브 (<target-repo>/.agents/sessions/completed/ 이동)
+    ├─ 15. 현재 상태 요약 (Current Status)
+    └─ 16. 다음 Action 정확히 3개 추천 (Recommended Next Actions)
     │
     ▼
 User (Human Gate)
     │
-    │ 16. 결과 직접 검증 및 ChatGPT에 결과 전달
+    │ 17. 결과 직접 검증 및 ChatGPT에 결과 전달
     ▼
 ChatGPT
     │
@@ -51,10 +52,11 @@ ChatGPT
 - **실행 Prompt 작성**: `target_repository`, `repository_root`, 구체적 `Goal`이 포함된 Prompt 생성.
 
 ### 2) Coding Agent (Primary Worker — Gemini)
-- **Repository Isolation 준수**: Target Repo 외 타 Repo, Repo Root 밖 파일, Shared Infra 절대 수정 금지.
-- **Plan & Second Inspection**: Plan 작성 후 실제 소스코드를 재검토하여 PLAN Final 확정.
+- **Repository Isolation 준수**: Target Repo 외 타 Repo, Repo Root 밖 파일(Control Repo `agi-with-gpt` 포함), Shared Infra 절대 수정 금지.
+- **Bootstrap**: 신규 Target Repo에 `.agents/`가 없으면 `agi-with-gpt/agents/templates/`를 읽어 자율적으로 `.agents/` 생성 및 초기화.
+- **Plan & Second Inspection**: Plan 작성 후 실제 소스코드를 재검토하고 Write Path가 Target Root 내부로만 한정되는지 확인하여 PLAN Final 확정.
 - **자율 실행 (Approval-Free)**: 중간 승인 대기 없이 구현 → 빌드 → 테스트 → 배포 → Smoke Test 자율 완료.
-- **문서 갱신 & 아카이브**: `STATE.md`, `ROADMAP.md` 갱신 및 완료 세션을 `completed`로 이관.
+- **문서 갱신 & 아카이브**: Target Repo의 `<target-repo>/.agents/STATE.md`, `ROADMAP.md` 갱신 및 완료 세션을 `completed`로 이관.
 - **결과 요약 및 추천**: `Current Status` 요약 및 `Recommended Next Actions` 3개 추천.
 
 ### 3) User (Human Gate)
@@ -67,5 +69,5 @@ ChatGPT
 ## 3. GitHub & Session의 데이터 분리 원칙 (Reference-Only)
 
 - **GitHub**: 사람과 Agent가 소통하는 **Collaboration Interface** (Issue, Comment, Commit, PR, Approval).
-- **agents/sessions/**: Agent가 작업을 영속적으로 이어가기 위한 **Execution State** (GOAL, PLAN, state.json, 결정 로그, 수정 파일).
+- **`<target-repository>/.agents/sessions/`**: Agent가 작업을 영속적으로 이어가기 위한 **Execution State** (GOAL, PLAN, state.json, 결정 로그, 수정 파일).
 - **분리 원칙**: GitHub 코멘트 전문을 Session 문서에 그대로 복사하거나, Session의 전 내용을 Issue body에 복사하지 않으며, **상호 Reference 경로(URL 및 Session ID)**만 연결합니다.

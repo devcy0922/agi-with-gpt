@@ -21,12 +21,14 @@
 
 ### 1) Repository Boundary Guardrail
 - 지정된 **Target Repository 외 타 Repository 수정 금지**.
+- Control Repository (`agi-with-gpt`)는 Target Repository 작업 실행 중 **READ-ONLY**입니다.
+  - Target Repository 작업 중 `agi-with-gpt/agents/...` 하위에 어떠한 파일도 수정(WRITE)해서는 안 됩니다.
+  - 모든 가변 상태(State, Roadmap, Active/Completed Sessions)는 오직 Target Repository 내 **`<target-repository>/.agents/`** 하위에만 생성 및 수정할 수 있습니다.
 - 타 Repository의 파일 수정, `git add`, `git commit`, `git push`, branch 변경, dependency 수정은 절대 허용되지 않습니다.
-- 편의를 이유로 연관된 다른 Repository까지 수정하는 행위를 완전 차단합니다.
 
 ### 2) Filesystem Boundary Guardrail
-- 작업 가능한 파일 시스템 범위는 오직 **`repository_root/**`** 내부뿐입니다.
-- Repository Root 바깥의 파일(`~/.zshrc`, `~/.bashrc`, `/etc`, `/usr/local`, 다른 프로젝트 디렉토리, 공용 NAS 등)을 수정해서는 안 됩니다.
+- 작업 가능한 파일 시스템 Writable 범위는 오직 **`repository_root/**`** 내부뿐입니다.
+- Repository Root 바깥의 파일(`~/.zshrc`, `~/.bashrc`, `/etc`, `/usr/local`, Control Repo, 다른 프로젝트 디렉토리, 공용 NAS 등)을 수정해서는 안 됩니다.
 
 ### 3) Shared Infrastructure Guardrail
 - 여러 프로젝트가 공유하는 Docker/DB/네트워크 등 파괴적인 인프라 명령은 명시적 허가 없이 금지됩니다:

@@ -13,12 +13,12 @@
 3. **git status 확인**
 4. **현재 branch 확인**
 5. **최근 commit 확인** (`git log -n 5`)
-6. **Repository PROJECT.md 확인**
-7. **STATE.md 확인**
-8. **ROADMAP.md 확인**
+6. **`<target-repository>/.agents/` 유효성 확인** (없을 시 Bootstrap 실행)
+7. **Target `.agents/PROJECT.md` 및 `DEPLOYMENT.md` 확인**
+8. **Target `.agents/STATE.md` 및 `ROADMAP.md` 확인**
 9. **실제 코드 구조 확인**
 10. **요청 분석**
-11. **Session 생성 또는 기존 Active Session 재개** (Target Repo, Goal 동일 시 재사용)
+11. **Session 생성 또는 기존 Active Session 재개** (`<target-repository>/.agents/sessions/`)
 12. **PLAN 작성**
 
 ---
@@ -49,6 +49,7 @@ PLAN v1을 작성한 직후 바로 구현에 들어가지 않고, 실제 코드�
 - [ ] 테스트 범위가 충분한가?
 - [ ] 배포 방식이 실제 환경(`DEPLOYMENT.md`)과 일치하는가?
 - [ ] Repository Boundary 및 Filesystem Boundary를 침범하지 않는가?
+- [ ] **모든 Write Path가 Target Repository 루트(`repository_root/**`) 내부인가?** (Control Repository `agi-with-gpt` 수정 시도 포함 차단)
 
 검토 결과 문제가 발견되면 PLAN을 수정하여 **FINAL PLAN**으로 확정합니다.
 
@@ -73,7 +74,7 @@ DEPLOY
    ↓
 POST_DEPLOY_VALIDATION (Smoke Test)
    ↓
-DOCUMENTATION (STATE / ROADMAP Update)
+DOCUMENTATION (STATE / ROADMAP Update inside Target .agents/)
    ↓
 SESSION COMPLETED & ARCHIVED
 ```
@@ -103,8 +104,8 @@ SESSION COMPLETED & ARCHIVED
 
 ## 5. 완료 문서 갱신 & Session Archive
 
-작업 완료 시 반드시 레포지토리 4대 문서(`STATE.md`, `ROADMAP.md`, 필요시 `PROJECT.md`, `DEPLOYMENT.md`)를 실제 결과에 맞춰 업데이트합니다.
-완료된 세션은 `agents/sessions/active/<session-id>`에서 `agents/sessions/completed/<session-id>`로 이동(Archive)합니다.
+작업 완료 시 반드시 Target Repository의 레포지토리 4대 문서(`<target-repository>/.agents/STATE.md`, `ROADMAP.md`, 필요시 `PROJECT.md`, `DEPLOYMENT.md`)를 실제 결과에 맞춰 업데이트합니다.
+완료된 세션은 `<target-repository>/.agents/sessions/active/<session-id>`에서 `<target-repository>/.agents/sessions/completed/<session-id>`로 이동(Archive)합니다.
 
 ---
 
@@ -158,3 +159,16 @@ Git Tag는 Coding Agent가 자율적 Loop 동안 임의로 생성하지 않습�
 - *"v0.x로 확정."*
 
 승인이 확인된 경우에만 `git status`, `HEAD`, 테스트/배포 상태 확인 후 Git Tag를 생성하고 push합니다.
+
+---
+
+## 8. Guardrail Enforcement 수준 명시 가이드
+
+문서 규칙(Policy)과 실제 기술적/자동화적 Enforcement 수준을 엄격하게 구분하여 보고합니다. 검증되지 않은 항목에 대해 절대적 표현(`Remaining Problems: None`, `Technical Debt: None`, `E2E_VERIFIED`)을 근거 없이 사용하는 것을 금지합니다.
+
+### Enforcement Levels:
+- **`POLICY_DEFINED`**: 규칙/문서상에 원칙이 명시되어 있는 상태.
+- **`DETERMINISTIC_CHECK_AVAILABLE`**: 정적 검사 스크립트나 경로 체크 알고리즘으로 검증 가능한 상태.
+- **`RUNTIME_ENFORCED`**: Agent 실행 루프나 도구 가드레일 레벨에서 실시간으로 Write Path / Shell 커맨드가 차단되는 상태.
+- **`E2E_VERIFIED`**: 실제 Target Repository 환경에서 전체 자율 루프(계획-구현-배포-검증-아카이브)가 작동 실증된 상태.
+
